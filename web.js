@@ -2,10 +2,8 @@ var express = require('express');
 
 var app = express.createServer(express.logger());
 
-var content = express.readFileSync('index.html', function (err, data) {
-  if (err) throw err;
-  console.log(data);
-});
+//var fs = require('fs');
+//var content = fs.readFileSync('index.html', function (err, data) {console.log(data);});
 
 app.get('/', function(request, response) {
   response.send('Hello World 3!' + ' index.html' );
