@@ -27,6 +27,8 @@ var cheerio = require('cheerio');
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
 
+var rest = require('restler');
+
 var assertFileExists = function(infile) {
     var instr = infile.toString();
     if(!fs.existsSync(instr)) {
@@ -34,6 +36,17 @@ var assertFileExists = function(infile) {
         process.exit(1); // http://nodejs.org/api/process.html#process_process_exit_code
     }
     return instr;
+};
+
+var assertUrlExists = function(url) {
+    var ans;
+    rest.get(url).on('complete', function(result) {
+      if (result instanceof Error) {
+        console.log("%s does not exist. Exiting.", url.toString());
+        this.retry(5000);
+    }
+      ans = result.toString()});
+    return ans;
 };
 
 var cheerioHtmlFile = function(htmlfile) {
@@ -64,6 +77,7 @@ var clone = function(fn) {
 if(require.main == module) {
     program
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+        .option('-u, --url <url_address>', 'URL address to be examined', clone(assertUrlExists), HTMLFILE_DEFAULT)
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         .parse(process.argv);
     var checkJson = checkHtmlFile(program.file, program.checks);
